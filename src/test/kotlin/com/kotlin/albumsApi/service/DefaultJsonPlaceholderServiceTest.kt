@@ -1,6 +1,7 @@
 package com.kotlin.albumsApi.service
 
 import com.kotlin.albumsApi.entity.Album
+import com.kotlin.albumsApi.entity.Photo
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*
@@ -51,15 +52,43 @@ class DefaultJsonPlaceholderServiceTest {
 
     @Test
     fun `test get all albums empty list`() {
+        val responseEntity = ResponseEntity<List<Album>>(emptyList(), HttpStatus.OK)
 
+        mockitoWhen(restTemplate.exchange("$jsonPlaceholderBaseUrl/albums", HttpMethod.GET, null,
+            object : ParameterizedTypeReference<List<Album>>() {}))
+            .thenReturn(responseEntity)
+
+        val getAllAlbumsResult = service.getAllAlbums()
+
+        assertEquals(emptyList<Album>(), getAllAlbumsResult)
     }
 
     @Test
     fun `test get photos by album`() {
+        val albumId = 1L
+        val photos = listOf(Photo(albumId, 1, "Photo 1", "url", "thumbnailUrl"))
+        val responseEntity = ResponseEntity.ok(photos)
+
+        mockitoWhen(restTemplate.exchange("$jsonPlaceholderBaseUrl/photos?albumId=$albumId", HttpMethod.GET, null,
+            object : ParameterizedTypeReference<List<Photo>>() {}))
+            .thenReturn(responseEntity)
+
+        val result = service.getPhotosByAlbumId(albumId)
+
+        assertEquals(photos, result)
     }
 
     @Test
     fun `test get photos by album empty list`() {
+        val albumId = 1L
+        val responseEntity = ResponseEntity.ok(emptyList<Photo>())
 
+        mockitoWhen(restTemplate.exchange("$jsonPlaceholderBaseUrl/photos?albumId=$albumId", HttpMethod.GET, null,
+            object : ParameterizedTypeReference<List<Photo>>() {}))
+            .thenReturn(responseEntity)
+
+        val result = service.getPhotosByAlbumId(albumId)
+
+        assertEquals(emptyList<Photo>(), result)
     }
 }
